@@ -1,0 +1,127 @@
+﻿@model ResultModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<link href="~/lib/select2/css/select2.css" rel="stylesheet" />
+
+
+
+<div class="banner">
+
+
+    <h1 id="title"> Check Your Car Safety</h1>
+    <h6 id="underTitle">Select you car from the list and check for any recalls</h6>
+    <select id="CarID">
+        <option value="">--Select Car--</option>
+        <!--Drop down menu-->
+        @foreach (var item in Model.Cars)
+        {
+            <option value="@item.CarID">@item.Make - @item.Model @item.Year  @item.BodyType </option>
+        }
+
+    </select>
+
+</div>
+
+
+
+    <hr />
+
+    <div class="main">
+     
+
+        <table style="display:none" id="tblRecall">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Contact</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTable"></tbody>
+        </table>
+
+
+    </div>  
+
+
+        @section scripts{
+            @*<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-1.12.4.js">
+
+            </script>*@
+
+            <script src="~/lib/select2/js/select2.min.js"></script>
+
+            <script>
+
+                //fill up the drop down box
+                $(document).ready(function () {
+                    $("#CarID").select2({});
+                    // updateTable();
+
+                    $("#CarID").change(updateTable);
+                });
+
+
+
+                //updaing the table
+                function updateTable() {
+                    var carid = $("#CarID").val();
+                    var data = {
+                        "CarID": carid
+                    }
+
+                    data = JSON.stringify(data);
+                    //  debugger;
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/Home/AjaxMethod",
+                        data: data,
+                        contentType: "application/json",
+                        success: function (response) {
+                            console.log(response);
+                            //var student = response.Student;
+                            //  listMonths = response.ListOfMonths;
+                            //  debugger;
+                            var records = response.model.recalls;
+
+                            var htmlContent = "";
+
+                            for (var i = 0; i < records.length; i++) {
+                                htmlContent += "<tr>";
+                                htmlContent += "<td>" + records[i].description + "</td>";
+                                htmlContent += "<td>" + records[i].startDate + "</td>";
+                                htmlContent += "<td>" + records[i].endDate + "</td>";
+                                htmlContent += "<td>" + records[i].contact + "</td>";
+
+                                htmlContent += "</tr>";
+
+                            }
+
+                            $("#recordsTable").html(htmlContent);
+                            $("#tblRecall").show();
+
+
+                        },
+                        error: function (err) {
+                            console.log(err);
+                            alert("failure");
+                        }
+                    });
+
+
+                }
+
+
+
+            </script>
+
+
+
+
+
+        }
